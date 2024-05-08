@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Léxico</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #ffffff; /* Un fondo más suave */
+            color: #333; /* Un color de texto más oscuro para mejor contraste */
+        }
+
+        .titulo { 
+            font-size: 2.5rem; /* Ligeramente más grande para destacar */
+            font-weight: bold;
+            color: #f17fe2; /* Un azul suave y moderno */
+            text-align: center;
+            margin-top: 2rem; 
+            margin-bottom: 2rem; /* Añadiendo espacio debajo del título */
+        }
+
+        button, input[type="file"], textarea {
+            font-size: 1rem;
+            border-radius: 37px; /* Bordes menos redondeados */
+            padding: 0.8rem;
+            width: auto; /* Autoajuste al contenido */
+            margin: 1rem; /* Espaciado uniforme */
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #ed8ad2; /* Un gris azulado más profesional */
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 2px 5px rgba(89, 215, 243, 0.15);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            background-color: #63a7e3; /* Un azul más claro para el hover */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+        }
+
+        .tabla-tokens {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tabla-tokens th, .tabla-tokens td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .tabla-tokens th {
+            background-color: #f17ae1; /* Azul claro */
+            color: #ffffff;
+        }
+
+        #section1 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body class="body">
+    <header class="titulo">Analizador</header>
+    <main>
+        <section id="section1">
+            <form method="POST" enctype="multipart/form-data">
+                <input class="subirArchivo" type="file" id="file" name="file" accept=".txt">
+                <button type="submit">Subir y Analizar</button>
+            </form>
+            <form method="POST" enctype="multipart/form-data">
+                <textarea name="code" placeholder="Inserte Aquí"></textarea>
+                <button type="submit">Analizar Código</button>
+            </form>
+            <table class="tabla-tokens">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Valor</th>
+                        <th>Línea</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for token in tokens %}
+                    <tr>
+                        <td>{{ token.type }}</td>
+                        <td>{{ token.value }}</td>
+                        <td>{{ token.line }}</td>
+                        <td>{{ token.description }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>   
+</body>
+</html>
