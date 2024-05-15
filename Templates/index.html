@@ -1,108 +1,85 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análisis Léxico</title>
+    <title>Document Analyzer</title>
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            background-color: #ffffff; /* Un fondo más suave */
-            color: #333; /* Un color de texto más oscuro para mejor contraste */
-        }
-
-        .titulo { 
-            font-size: 2.5rem; /* Ligeramente más grande para destacar */
-            font-weight: bold;
-            color: #f17fe2; /* Un azul suave y moderno */
-            text-align: center;
-            margin-top: 2rem; 
-            margin-bottom: 2rem; /* Añadiendo espacio debajo del título */
-        }
-
-        button, input[type="file"], textarea {
-            font-size: 1rem;
-            border-radius: 37px; /* Bordes menos redondeados */
-            padding: 0.8rem;
-            width: auto; /* Autoajuste al contenido */
-            margin: 1rem; /* Espaciado uniforme */
-            cursor: pointer;
-        }
-
-        button {
-            background-color: #ed8ad2; /* Un gris azulado más profesional */
-            color: #ffffff;
-            border: none;
-            box-shadow: 0 2px 5px rgba(89, 215, 243, 0.15);
-            transition: background-color 0.3s, box-shadow 0.3s;
-        }
-
-        button:hover {
-            background-color: #63a7e3; /* Un azul más claro para el hover */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-        }
-
-        .tabla-tokens {
-            width: 100%;
+        table, th, td {
+            border: 1px solid black;
             border-collapse: collapse;
         }
-
-        .tabla-tokens th, .tabla-tokens td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
-
-        .tabla-tokens th {
-            background-color: #f17ae1; /* Azul claro */
-            color: #ffffff;
-        }
-
-        #section1 {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
+        th, td {
+            padding: 10px;
         }
     </style>
 </head>
-<body class="body">
-    <header class="titulo">Analizador</header>
-    <main>
-        <section id="section1">
-            <form method="POST" enctype="multipart/form-data">
-                <input class="subirArchivo" type="file" id="file" name="file" accept=".txt">
-                <button type="submit">Subir y Analizar</button>
-            </form>
-            <form method="POST" enctype="multipart/form-data">
-                <textarea name="code" placeholder="Inserte Aquí"></textarea>
-                <button type="submit">Analizar Código</button>
-            </form>
-            <table class="tabla-tokens">
-                <thead>
-                    <tr>
-                        <th>Tipo</th>
-                        <th>Valor</th>
-                        <th>Línea</th>
-                        <th>Descripción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for token in tokens %}
-                    <tr>
-                        <td>{{ token.type }}</td>
-                        <td>{{ token.value }}</td>
-                        <td>{{ token.line }}</td>
-                        <td>{{ token.description }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>
-    </main>   
+<body>
+    <h1>Document Analyzer</h1>
+    <form method="post">
+        <textarea name="code" rows="10" cols="50">{{ code }}</textarea><br>
+        <input type="submit" value="Analyze">
+    </form>
+    {% if tokens %}
+        <table>
+            <tr>
+                <th>TOKEN</th>
+                <th>Value</th>
+                <th>Palabra Reservada</th>
+                <th>Paréntesis Izquierdo</th>
+                <th>Paréntesis Derecho</th>
+                <th>Llave Izquierda</th>
+                <th>Llave Derecha</th>
+                <th>Punto y Coma</th>
+                <th>Variable</th>
+                <th>Operación</th>
+                <th>Coma</th>
+                <th>Error</th>
+            </tr>
+            {% for token in tokens %}
+            <tr>
+                <td>{{ token.TOKEN }}</td>
+                <td>{{ token.value }}</td>
+                <td>{{ token.Palabra_Reservada }}</td>
+                <td>{{ token.Paréntesis_Izquierdo }}</td>
+                <td>{{ token.Paréntesis_Derecho }}</td>
+                <td>{{ token.Llave_Izquierda }}</td>
+                <td>{{ token.Llave_Derecha }}</td>
+                <td>{{ token.Punto_y_Coma }}</td>
+                <td>{{ token.Variable }}</td>
+                <td>{{ token.Operación }}</td>
+                <td>{{ token.Coma }}</td>
+                <td>{{ token.Error }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <h2>Summary of 'X' Counts</h2>
+        <table>
+            <tr>
+                <th>Palabra Reservada</th>
+                <th>Paréntesis Izquierdo</th>
+                <th>Paréntesis Derecho</th>
+                <th>Llave Izquierda</th>
+                <th>Llave Derecha</th>
+                <th>Punto y Coma</th>
+                <th>Variable</th>
+                <th>Operación</th>
+                <th>Coma</th>
+                <th>Error</th>
+            </tr>
+            <tr>
+                <td>{{ sums['Palabra_Reservada'] }}</td>
+                <td>{{ sums['Paréntesis_Izquierdo'] }}</td>
+                <td>{{ sums['Paréntesis_Derecho'] }}</td>
+                <td>{{ sums['Llave_Izquierda'] }}</td>
+                <td>{{ sums['Llave_Derecha'] }}</td>
+                <td>{{ sums['Punto_y_Coma'] }}</td>
+                <td>{{ sums['Variable'] }}</td>
+                <td>{{ sums['Operación'] }}</td>
+                <td>{{ sums['Coma'] }}</td>
+                <td>{{ sums['Error'] }}</td>
+            </tr>
+        </table>
+    {% endif %}
 </body>
 </html>
+

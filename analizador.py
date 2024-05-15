@@ -1,101 +1,78 @@
 from flask import Flask, request, render_template
 import ply.lex as lex
 
+app = Flask(__name__)
+
+# Define reserved words
+reserved = {
+    'programa': 'PROGRAMA', 'int': 'INT', 'read': 'READ', 'print': 'PRINT', 'end': 'END',
+    'la': 'LA', 'es': 'ES'
+}
+
 tokens = (
-    'IDENTIFIER',
-    'FOR',
-    'IF',
-    'DO',
-    'WHILE',
-    'ELSE',
-    'LPAREN',
-    'RPAREN',
-)
+    'IDENTIFIER', 'NUMBER', 'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE',
+    'SEMICOLON', 'COMMA', 'PLUS', 'MINUS', 'ERROR'
+) + tuple(reserved.values())
 
-def t_FOR(t):
-    r'\bfor\b|\bFOR\b'
-    t.type = 'FOR'
-    t.description = 'Reservada for'
-    return t
+# Simple rules for individual tokens
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
+t_LBRACE = r'\{'
+t_RBRACE = r'\}'
+t_SEMICOLON = r';'
+t_COMMA = r','
+t_ignore = ' \t\n'
 
-def t_IF(t):
-    r'\bif\b|\bIF\b'
-    t.type = 'IF'
-    t.description = 'Reservada if'
-    return t
-
-def t_DO(t):
-    r'\bdo\b|\bDO\b'
-    t.type = 'DO'
-    t.description = 'Reservada do'
-    return t
-
-def t_WHILE(t):
-    r'\bwhile\b|\bWHILE\b'
-    t.type = 'WHILE'
-    t.description = 'Reservada while'
-    return t
-
-def t_ELSE(t):
-    r'\belse\b|\bELSE\b'
-    t.type = 'ELSE'
-    t.description = 'Reservada else'
-    return t
-
-
-def t_LPAREN(t):
-    r'\('
-    t.type = 'LPAREN'
-    t.description = 'Parentesis de apertura'
-    return t
-
-def t_RPAREN(t):
-    r'\)'
-    t.type = 'RPAREN'
-    t.description = 'Parentesis de cierre'
+def t_NUMBER(t):
+    r'\d+'
+    t.value = int(t.value)
     return t
 
 def t_IDENTIFIER(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = 'IDENTIFIER'
-    t.description = 'Identificador'
+    r'[a-zA-Z_][a-zA-Z0-9_]*'
+    t.type = reserved.get(t.value.lower(), 'IDENTIFIER')
+    if t.type == 'IDENTIFIER' and not t.value.isidentifier():
+        t.type = 'ERROR'
     return t
 
-t_ignore = ' \t\n'
-
 def t_error(t):
-    print(f"Illegal character '{t.value[0]}'")
+    print(f"Illegal character '{t.value[0]}' at position {t.lexpos}")
     t.lexer.skip(1)
 
 lexer = lex.lex()
 
-app = Flask(__name__)
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        if 'file' in request.files:
-            file = request.files['file']
-            if file.filename.endswith('.txt'):
-                code = file.read().decode('utf-8')
-            else:
-                return "File type not supported"
-        else:
-            code = request.form['code']
+        code = request.form['code']
         lexer.input(code)
-        line_counter = 1
-        tokens = []
-        for token in lexer:
-            tokens.append({'type': token.type, 'value': token.value, 'line': line_counter, 'description': token.description})
-            if token.value in ['(', ')']:
-                line_counter += 1
-            else:
-                words = token.value.split()
-                line_counter += len(words)
-        return render_template('index.html', tokens=tokens)
-    return render_template('index.html')
+        tokens_list = []
+        sums = { 'Palabra_Reservada': 0, 'Paréntesis_Izquierdo': 0, 'Paréntesis_Derecho': 0, 'Llave_Izquierda': 0, 
+                 'Llave_Derecha': 0, 'Punto_y_Coma': 0, 'Variable': 0, 'Operación': 0, 'Coma': 0, 'Error': 0 }
+        for tok in lexer:
+            token_dict = {
+                'TOKEN': tok.type,
+                'value': tok.value,
+                'Palabra_Reservada': 'X' if tok.type in reserved.values() else '',
+                'Paréntesis_Izquierdo': 'X' if tok.type == 'LPAREN' else '',
+                'Paréntesis_Derecho': 'X' if tok.type == 'RPAREN' else '',
+                'Llave_Izquierda': 'X' if tok.type == 'LBRACE' else '',
+                'Llave_Derecha': 'X' if tok.type == 'RBRACE' else '',
+                'Punto_y_Coma': 'X' if tok.type == 'SEMICOLON' else '',
+                'Variable': 'X' if tok.type == 'IDENTIFIER' else '',
+                'Operación': 'X' if tok.type in ['PLUS', 'MINUS'] else '',
+                'Coma': 'X' if tok.type == 'COMMA' else '',
+                'Error': 'X' if tok.type == 'ERROR' else ''
+            }
+            tokens_list.append(token_dict)
+            # Increment counters for 'X' marks
+            for key in sums:
+                if token_dict[key] == 'X':
+                    sums[key] += 1
+        return render_template('index.html', tokens=tokens_list, code=code, sums=sums)
+    return render_template('index.html', tokens=[], code='', sums={})
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
-    
